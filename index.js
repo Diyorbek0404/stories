@@ -10,8 +10,8 @@ const PORT = 5000;
 app.use("/api", router)
 app.use("/", (req, res) => {
     res.send(`
-        <div>
-            <h2>Salom. Stories dasturining backendiga xush kelibsiz. Yaqinda mobile variani tayyor bo'ladi va katta yangiliklar bo'ladi.</h2>
+        <div style="font-family:sans-serif">
+            <h2>Salom Stories dasturining backendiga xush kelibsiz. Yaqinda mobile varianti tayyor bo'ladi va katta yangiliklar bo'ladi.</h2>
             <span>dasturning backendi nodejs expressjs, malumotlar bazasi uchun esa mongodb ishlailgan</span>
         </div>
     `)
