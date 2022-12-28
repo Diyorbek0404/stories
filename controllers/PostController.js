@@ -1,37 +1,27 @@
 import Post from "../model/Post.js";
-import ApiError from "../error/ApiError.js";
+// import ApiError from "../error/ApiError.js";
 
 class PostController {
     async createPost(req, res, next) {
-        const newPost = new Post(req.body)
-        if (newPost) {
-            const post = await newPost.save();
-            return res.status(200).json(post)
+        const { isArchive, isPinned, title, description } = req.body;
+        if (!isArchive || !isPinned || !title || !description) {
+            return res.status(500).json("Hamma malumotlarni kiriting")
         }
-        return next(ApiError.badRequest("Post qo'shishda xato"))
+        const post = await Post.create({ isArchive, isPinned, title, description })
+        return res.status(201).json(post)
     }
 
     async getAllPost(req, res) {
-        let { day = '', year = '', month = "", _id = "" } = req.query
-        const post = await Post.find().sort({ $natural: -1 })
-        if (!year && !day && !month && !_id) {
-            return res.json("hech bo'lmasa idni kiriting")
-        } else if (_id && !year && !day && !month) {
-            let found = post.filter(el => el.userId == _id)
-            return res.json(found)
-        } else if (year && _id && !month && !day) {
-            let found = post.filter(el => el.year == year && el.userId == _id)
-            return res.json(found)
-        } else if (month && _id && !year && !day) {
-            let found = post.filter(el => el.month == month && el.userId == _id)
-            return res.json(found)
-        } else if (day && _id && !year && !month) {
-            let found = post.filter(el => el.day == day && el.userId == _id)
-            return res.json(found)
-        } else {
-            let found = post.filter(el => el.year == year && el.userId == _id && el.day == day && el.month == month)
-            return res.json(found)
-        }
+        const post = await Post.find({ isArchive: "false", isPinned: "false" }).sort({ $natural: -1 })
+        return res.status(200).json(post)
+    }
+    async updateById(req, res) {
+        const post = await Post.findByIdAndUpdate(req.params.id, {
+            $set: req.body
+        }, {
+            new: true
+        })
+        return res.status(200).json(post)
     }
 
     async getById(req, res) {
@@ -44,15 +34,53 @@ class PostController {
         return res.status(200).json("o'chirildi")
     }
 
-    async likePost(req, res, next) {
-        const post = await Post.findById(req.params.id)
-        if (!post.likes.includes(req.body.userId)) {
-            await post.updateOne({ $push: { likes: req.body.userId } })
-            return res.status(200).json("bu videoni yoqtirdingiz")
-        } else {
-            await post.updateOne({ $pull: { likes: req.body.userId } })
-            return res.status(200).json("bu siz likeni olib tashladingiz")
+    async getPinned(req, res, next) {
+        const post = await Post.find({ isPinned: "true" }).sort({ $natural: -1 })
+        return res.status(200).json(post)
+    }
+    async getArchive(req, res, next) {
+        const post = await Post.find({ isArchive: "true", }).sort({ $natural: -1 })
+        return res.status(200).json(post)
+    }
+
+    async setNotification(req, res) {
+        const newNotification = {
+            isHave: req.body.isHave,
+            year: req.body.year,
+            day: req.body.day,
+            month: req.body.month,
+            hour: req.body.hour,
+            minutes: req.body.minutes,
         }
+        const post = await Post.findById(req.params.id)
+        await post.updateOne({ $push: { notification: newNotification } })
+        return res.status(200).json("eslatma belgilandi")
+    }
+
+    async addToArchive(req, res) {
+        const post = await Post.findOneAndUpdate(req.params.id, {
+            isArchive: "true"
+        }, { new: true })
+        return res.status(200).json("archivega qo'shildi")
+    }
+    async backFromArchive(req, res) {
+        const post = await Post.findOneAndUpdate(req.params.id, {
+            isArchive: "false"
+        }, { new: true })
+        return res.status(200).json("archivedan olindi")
+    }
+
+    async addToPinned(req, res) {
+        const post = await Post.findOneAndUpdate(req.params.id, {
+            isPinned: "true"
+        }, { new: true })
+        return res.status(200).json("pinnedga qo'shildi")
+    }
+    async backFromPinned(req, res) {
+        const post = await Post.findOneAndUpdate(req.params.id, {
+            isPinned: "false"
+        }, { new: true })
+        return res.status(200).json("pinneddan olindi")
     }
 }
 

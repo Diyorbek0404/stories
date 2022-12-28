@@ -1,28 +1,30 @@
 import mongoose from "mongoose";
 
 const PostSchema = new mongoose.Schema({
-    userId:{
-        type:String,
+    isArchive: {
+        type: String,
+        required: true
     },
-    username:{
-        type:String,
+    isPinned: {
+        type: String,
+        required: true
     },
-    stories:{
-        type:String,
-        required:true
+    title: {
+        type: String,
+        required: true
     },
-    year:{
-        type:String,
-        required:true
+    description: {
+        type: String,
+        required: true
     },
-    month:{
-        type:String,
-        required:true
-    },
-    day:{
-        type:Number,
-        required:true
-    },
+    notification: [{
+        isHave: String,
+        year: "String",
+        day: Number,
+        month: "String",
+        hours: Number,
+        minutes: Number
+    }]
 }, {
     timestamps: true
 })
