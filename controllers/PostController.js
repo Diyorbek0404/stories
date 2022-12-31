@@ -11,10 +11,17 @@ class PostController {
         return res.status(201).json(post)
     }
 
-    async getAllPost(req, res) {
+  async getAllPost(req, res) {
+        const { search = "" } = req.query;
         const post = await Post.find({ isArchive: "false", isPinned: "false" }).sort({ $natural: -1 })
-        return res.status(200).json(post)
+        if (!search) {
+            return res.status(200).json(post)
+        } else {
+            const filter = post.filter(el => el.title == search)
+            return res.status(200).json(filter)
+        }
     }
+    
     async updateById(req, res) {
         const post = await Post.findByIdAndUpdate(req.params.id, {
             $set: req.body
