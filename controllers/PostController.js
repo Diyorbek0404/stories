@@ -17,7 +17,7 @@ class PostController {
         if (!search) {
             return res.status(200).json(post)
         } else {
-            const filter = post.filter(el => el.title == search)
+            const filter = post.filter(el => el.title == search || el.description == search)
             return res.status(200).json(filter)
         }
     }
